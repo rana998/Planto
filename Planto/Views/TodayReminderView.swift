@@ -151,8 +151,11 @@ struct TodayReminderView: View {
                     plantRow(plant, index: index)
                         .listRowBackground(APP_BG)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) { vm.deleteOne(at: index) } label: {
+                            Button(role: .destructive) { 
+                                vm.deleteOne(at: index)
+                                } label: { 
                                 Label("Delete", systemImage: "trash")
+                                
                             }
                         }
                 }
