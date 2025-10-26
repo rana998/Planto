@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TodayReminderView: View {
     @StateObject private var vm: TodayReminderViewModel
+    @AppStorage("hasOnboarded_v2") private var hasOnboarded = false
 
     // تهيئة تسمح بتمرير نباتات أولية (من شاشة البداية مثلًا)
     init(initialPlants: [Plant] = []) {
@@ -22,17 +23,28 @@ struct TodayReminderView: View {
             VStack(spacing: 0) {
                 headerView()
 
-                if vm.allDone {
-                    AllDoneView()
-                        .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.25), value: vm.allDone)
+                // الأونبوردنغ تظهر أول تشغيل فقط
+                if !hasOnboarded {
+                    OnboardingSection {
+                        vm.beginAdd()   // يفتح شيت الإضافة
+                    }
                 } else {
-                    progressHeader()
-                    listSection()
+                    // صفحة Today المعتادة
+                    if vm.allDone {
+                        AllDoneView()
+                            .transition(.opacity)
+                            .animation(.easeInOut(duration: 0.25), value: vm.allDone)
+                    } else {
+                        progressHeader()
+                        listSection()
+                    }
+                }
+
+                // زر الإضافة يظهر فقط بعد الأونبوردنغ
+                if hasOnboarded {
+                    addButton()
                 }
             }
-
-            addButton()
         }
         // شيت الإضافة
         .sheet(isPresented: $vm.showAddSheet) {
@@ -46,6 +58,7 @@ struct TodayReminderView: View {
                     vm.draftWatering = watering
                     vm.draftAmount = amount
                     vm.saveFromDraft()
+                    hasOnboarded = true
                 },
                 onDelete: nil,
                 plantName: vm.draftName,
@@ -78,9 +91,10 @@ struct TodayReminderView: View {
             )
             .preferredColorScheme(.dark)
         }
+        .navigationBarBackButtonHidden(true)
     }
 
-    // MARK: - UI (نفس تصميمك)
+    // MARK: - UI
 
     private func headerView() -> some View {
         VStack(spacing: 0) {
@@ -151,11 +165,10 @@ struct TodayReminderView: View {
                     plantRow(plant, index: index)
                         .listRowBackground(APP_BG)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) { 
+                            Button(role: .destructive) {
                                 vm.deleteOne(at: index)
-                                } label: { 
+                            } label: {
                                 Label("Delete", systemImage: "trash")
-                                
                             }
                         }
                 }
@@ -229,7 +242,6 @@ struct TodayReminderView: View {
                         .font(.system(size: 25, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 54, height: 54)
-                        // لو تبغي التدرّج بدل APP_GREEN عدّلي هذا السطر فقط
                         .background(
                             Circle().fill(
                                 LinearGradient(
@@ -240,11 +252,10 @@ struct TodayReminderView: View {
                                 )
                             )
                         )
-
-                        .overlay(Circle().stroke(.white.opacity(0.50), lineWidth: 1))
-                        .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 6)
+                        .overlay(Circle().stroke(.white.opacity(0.20), lineWidth: 1))
+                        .shadow(color: .black.opacity(0.20), radius: 8, x: 0, y: 6)
                 }
-                .glassEffect(.clear)
+                .glassEffect()
                 .padding(.trailing, 20)
                 .padding(.bottom, 28)
             }
@@ -252,14 +263,11 @@ struct TodayReminderView: View {
     }
 }
 
-// شاشة All Done لو كنتِ ضفتِها قبل — اتركيها كما هي
 // شاشة "All Done" (تُعرض فقط عند اكتمال التشييك)
 private struct AllDoneView: View {
-    let imageName: String = "Done_image"
-
     var body: some View {
         VStack(spacing: 22) {
-            Image(imageName)
+            Image("Done_image")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 220, height: 220)
@@ -275,12 +283,62 @@ private struct AllDoneView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding(.top, 40)
-        .navigationBarBackButtonHidden(true) // تأكيد إضافي داخل الشاشة نفسها
+        .padding(.top, 80)
+        .navigationBarBackButtonHidden(true)
     }
 }
 
+// MARK: - Onboarding (Splash) section used when list is empty
+private struct OnboardingSection: View {
+    var onTapAdd: () -> Void
 
+    var body: some View {
+        VStack(spacing: 18) {
+            Spacer(minLength: 10)
+
+            Image("plant_image")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 210, height: 210)
+                .clipped()
+                .padding(.top, 30)
+
+            Text("Start your plant journey!")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+
+            Text("Now all your plants will be in one place and we will help you take care of them :) 🪴")
+                .font(.system(size: 16))
+                .foregroundStyle(.white.opacity(0.7))
+                .multilineTextAlignment(.center)
+                .lineSpacing(6)
+                .frame(width: 315)
+
+            Spacer()
+
+            Button(action: onTapAdd) {
+                Text("Set Plant Reminder")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 280, height: 44)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.34, green: 0.82, blue: 0.54),
+                                Color(red: 0.22, green: 0.79, blue: 0.54)
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .clipShape(Capsule())
+                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
+            }
+            .glassEffect(.clear)
+            .padding(.bottom, 100)
+        }
+    }
+}
 
 #Preview {
     TodayReminderView()

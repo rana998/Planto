@@ -6,6 +6,7 @@
 //
 
 import Combine
+import SwiftUI
 
 final class TodayReminderViewModel: ObservableObject {
     // البيانات
@@ -50,7 +51,6 @@ final class TodayReminderViewModel: ObservableObject {
     }
 
     func beginAdd() {
-        clearIfAllDone()  // ← إضافة السطر هذا
 
         editingIndex = nil
         draftName = ""
@@ -86,9 +86,11 @@ final class TodayReminderViewModel: ObservableObject {
         if let i = editingIndex {
             plants[i] = newItem
         } else {
+            if allDone { clearCompleted() }   // ← نضيفها هنا فقط
             plants.append(newItem)
         }
     }
+
 
     func deleteEditing() {
         if let i = editingIndex {
