@@ -1,17 +1,9 @@
-//
-//  TodayReminderView.swift
-//  Planto
-//
-//  Created by Rana on 01/05/1447 AH.
-//
-
 import SwiftUI
 
 struct TodayReminderView: View {
     @StateObject private var vm: TodayReminderViewModel
     @AppStorage("hasOnboarded_v2") private var hasOnboarded = false
 
-    // تهيئة تسمح بتمرير نباتات أولية (من شاشة البداية مثلًا)
     init(initialPlants: [Plant] = []) {
         _vm = StateObject(wrappedValue: TodayReminderViewModel(initialPlants: initialPlants))
     }
@@ -23,13 +15,11 @@ struct TodayReminderView: View {
             VStack(spacing: 0) {
                 headerView()
 
-                // الأونبوردنغ تظهر أول تشغيل فقط
                 if !hasOnboarded {
                     OnboardingSection {
-                        vm.beginAdd()   // يفتح شيت الإضافة
+                        vm.beginAdd()
                     }
                 } else {
-                    // صفحة Today المعتادة
                     if vm.allDone {
                         AllDoneView()
                             .transition(.opacity)
@@ -39,11 +29,11 @@ struct TodayReminderView: View {
                         listSection()
                     }
                 }
-
-                // زر الإضافة يظهر فقط بعد الأونبوردنغ
-                if hasOnboarded {
-                    addButton()
-                }
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if hasOnboarded {
+                addButton()
             }
         }
         // شيت الإضافة
@@ -59,6 +49,9 @@ struct TodayReminderView: View {
                     vm.draftAmount = amount
                     vm.saveFromDraft()
                     hasOnboarded = true
+                    
+                    // ✅ جدولة إشعار للنبتة الجديدة
+                    PlantNotification.shared.send(plant: name, every: watering)
                 },
                 onDelete: nil,
                 plantName: vm.draftName,
@@ -81,6 +74,9 @@ struct TodayReminderView: View {
                     vm.draftWatering = watering
                     vm.draftAmount = amount
                     vm.saveFromDraft()
+                    
+                    // ✅ جدولة إشعار جديد بعد التعديل
+                    PlantNotification.shared.send(plant: name, every: watering)
                 },
                 onDelete: { vm.deleteEditing() },
                 plantName: vm.draftName,
@@ -180,7 +176,6 @@ struct TodayReminderView: View {
 
     private func plantRow(_ plant: Plant, index: Int) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            // دائرة التشيك
             Button { vm.toggleWatered(at: index) } label: {
                 Image(systemName: plant.isWatered ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 20, weight: .semibold))
@@ -188,7 +183,6 @@ struct TodayReminderView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                // المكان
                 HStack(spacing: 6) {
                     Image(systemName: "location")
                         .font(.system(size: 11, weight: .semibold))
@@ -197,7 +191,6 @@ struct TodayReminderView: View {
                 .font(.system(size: 12))
                 .foregroundStyle(.white.opacity(0.55))
 
-                // اسم النبتة ➜ يفتح التعديل
                 Button {
                     vm.beginEdit(index: index)
                 } label: {
@@ -207,7 +200,6 @@ struct TodayReminderView: View {
                 }
                 .buttonStyle(.plain)
 
-                // البادجز
                 HStack(spacing: 8) {
                     badge(icon: "sun.max", text: plant.light, tint: APP_YELLOW)
                     badge(icon: "drop",    text: plant.waterAmount, tint: APP_BLUE)
@@ -235,35 +227,30 @@ struct TodayReminderView: View {
     }
 
     private func addButton() -> some View {
-        VStack { Spacer()
-            HStack { Spacer()
-                Button { vm.beginAdd() } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 25, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 54, height: 54)
-                        .background(
-                            Circle().fill(
-                                LinearGradient(
-                                    colors: [Color(red: 0.34, green: 0.82, blue: 0.54),
-                                             Color(red: 0.34, green: 0.82, blue: 0.54).opacity(0.9)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
+        Button { vm.beginAdd() } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 25, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 54, height: 54)
+                .background(
+                    Circle().fill(
+                        LinearGradient(
+                            colors: [Color(red: 0.34, green: 0.82, blue: 0.54),
+                                     Color(red: 0.34, green: 0.82, blue: 0.54).opacity(0.9)],
+                            startPoint: .top,
+                            endPoint: .bottom
                         )
-                        .overlay(Circle().stroke(.white.opacity(0.20), lineWidth: 1))
-                        .shadow(color: .black.opacity(0.20), radius: 8, x: 0, y: 6)
-                }
-                .glassEffect()
-                .padding(.trailing, 20)
-                .padding(.bottom, 28)
-            }
+                    )
+                )
+                .overlay(Circle().stroke(.white.opacity(0.20), lineWidth: 1))
+                .shadow(color: .black.opacity(0.20), radius: 8, x: 0, y: 6)
         }
+        .glassEffect()
+        .padding(.trailing, 20)
+        .padding(.bottom, 28)
     }
 }
 
-// شاشة "All Done" (تُعرض فقط عند اكتمال التشييك)
 private struct AllDoneView: View {
     var body: some View {
         VStack(spacing: 22) {
@@ -288,7 +275,6 @@ private struct AllDoneView: View {
     }
 }
 
-// MARK: - Onboarding (Splash) section used when list is empty
 private struct OnboardingSection: View {
     var onTapAdd: () -> Void
 

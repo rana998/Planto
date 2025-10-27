@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct PlantoApp: App {
+    init() {
+            // ✅ طلب إذن الإشعارات عند فتح التطبيق
+            PlantNotification.shared.askPermission()
+        }
     var body: some Scene {
         WindowGroup {
             TodayReminderView()
