@@ -157,16 +157,19 @@ struct TodayReminderView: View {
                     .foregroundStyle(.white)
                     .font(.system(size: 16, weight: .semibold))
             ) {
-                ForEach(Array(vm.plants.enumerated()), id: \.element.id) { index, plant in
-                    plantRow(plant, index: index)
-                        .listRowBackground(APP_BG)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                vm.deleteOne(at: index)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                // ✅ ترتيب: النباتات بدون ✓ فوق، المكتملة تحت
+                ForEach(Array(vm.plants.sorted { !$0.isWatered && $1.isWatered }.enumerated()), id: \.element.id) { _, plant in
+                    if let index = vm.plants.firstIndex(where: { $0.id == plant.id }) {
+                        plantRow(plant, index: index)
+                            .listRowBackground(APP_BG)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    vm.deleteOne(at: index)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
-                        }
+                    }
                 }
             }
         }
@@ -176,39 +179,44 @@ struct TodayReminderView: View {
 
     private func plantRow(_ plant: Plant, index: Int) -> some View {
         HStack(alignment: .top, spacing: 12) {
+            // دائرة التشيك
             Button { vm.toggleWatered(at: index) } label: {
                 Image(systemName: plant.isWatered ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(plant.isWatered ? APP_GREEN : .white.opacity(0.9))
+                    .foregroundStyle(plant.isWatered ? APP_GREEN.opacity(0.85) : .white.opacity(0.9))
             }
 
             VStack(alignment: .leading, spacing: 6) {
+                // المكان
                 HStack(spacing: 6) {
                     Image(systemName: "location")
                         .font(.system(size: 11, weight: .semibold))
                     Text("in \(plant.room)")
                 }
                 .font(.system(size: 12))
-                .foregroundStyle(.white.opacity(0.55))
+                .foregroundStyle(.white.opacity(plant.isWatered ? 0.35 : 0.55))
 
+                // اسم النبتة
                 Button {
                     vm.beginEdit(index: index)
                 } label: {
                     Text(plant.name)
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.white.opacity(plant.isWatered ? 0.6 : 1.0))
                 }
                 .buttonStyle(.plain)
 
+                // البادجز
                 HStack(spacing: 8) {
-                    badge(icon: "sun.max", text: plant.light, tint: APP_YELLOW)
-                    badge(icon: "drop",    text: plant.waterAmount, tint: APP_BLUE)
+                    badge(icon: "sun.max", text: plant.light, tint: APP_YELLOW.opacity(plant.isWatered ? 0.5 : 1))
+                    badge(icon: "drop",    text: plant.waterAmount, tint: APP_BLUE.opacity(plant.isWatered ? 0.5 : 1))
                 }
             }
             Spacer()
         }
         .padding(.vertical, 12)
     }
+
 
     private func badge(icon: String, text: String, tint: Color) -> some View {
         HStack(spacing: 6) {
