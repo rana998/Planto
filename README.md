@@ -1,30 +1,34 @@
-🌿 Planto — Smart Plant Reminder App
-Purpose:
+## Planto — Smart Plant Reminder App 🌱
+
+## Purpose:
 Planto is an iOS app built with SwiftUI that helps users take care of their plants.
 The main goal is to make plant care easier by reminding users when to water their plants and allowing them to track their progress through a simple, friendly interface.
 
 <img width="2236" height="1120" alt="Image" src="https://github.com/user-attachments/assets/3924255d-b965-49d3-b621-cd46190a7609" />
 
-Functionality:
-Users can add new plants with details such as name, room, light type, watering frequency, and water amount.
-The app displays a daily list of all plants. When a plant is watered, it moves to the lower part of the list with a slightly dimmed color.
-A progress bar shows how many plants have been watered today.
-Users can edit or delete plants anytime.
-Local notifications remind users to water plants based on the selected frequency.
-The app uses MVVM architecture for clean code and easy updates.
-
-How It Works:
-Add your plant and set watering details.
-The app will send reminders according to your chosen frequency.
-Tap the check icon to mark a plant as watered — it will move below and appear dimmed.
-When all plants are watered, an “All Done” screen appears.
-
-Planto is a mobile app built in Swift using SwiftUI.
-It helps users take care of their plants by creating watering reminders and tracking daily progress.
+ ## Main Features
+Add Plants: Create reminders with details like name, room, light type, watering frequency, and amount.
+Daily Reminders: View all plants and mark them as watered — completed ones appear dimmed below.
+Progress Tracking: A progress bar shows how many plants have been watered.
+Edit & Delete: Update or remove plant reminders anytime.
+Local Notifications: Get reminders based on your selected watering frequency.
+All Done Screen: Celebrate when all your plants are cared for!
 
 ## ⚙️ Technologies Used
-- Swift 5 — main programming language  
-- SwiftUI — for the user interface  
-- Combine — for reactive state management  
-- MVVM — app architecture pattern  
-- UserNotifications — for local reminders
+Swift 5 – Programming language
+SwiftUI – User interface framework
+Combine – Reactive state management
+MVVM Architecture – For clean separation of logic and UI
+UserNotifications – Local reminder notifications
+
+## 🪴 How It Works
+Add your plant and set watering details.
+The app sends reminders according to your selected schedule.
+Tap the check icon after watering — the plant moves down and becomes slightly dimmed.
+When all are done, the app shows an “All Done” confirmation screen.
+
+## Architecture
+Planto follows the MVVM pattern:
+Model:Defines plant data and reminder logic.
+ViewModel: Manages app state, progress, and user interactions.
+View: Displays reminders and handles user actions with smooth SwiftUI transitions.
