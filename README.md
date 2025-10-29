@@ -15,7 +15,7 @@ Local Notifications: Get reminders based on your selected watering frequency.
 All Done Screen: Celebrate when all your plants are cared for!
 
 ## ⚙️ Technologies Used
-Swift 5 – Programming language
+Swift – Programming language
 SwiftUI – User interface framework
 Combine – Reactive state management
 MVVM Architecture – For clean separation of logic and UI
