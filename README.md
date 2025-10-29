@@ -3,6 +3,7 @@ Purpose:
 Planto is an iOS app built with SwiftUI that helps users take care of their plants.
 The main goal is to make plant care easier by reminding users when to water their plants and allowing them to track their progress through a simple, friendly interface.
 
+
 Functionality:
 Users can add new plants with details such as name, room, light type, watering frequency, and water amount.
 The app displays a daily list of all plants. When a plant is watered, it moves to the lower part of the list with a slightly dimmed color.
